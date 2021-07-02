@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:p="http://primefaces.org/ui">
+<f:view>
+    <h:head>
+        <title>Vitrual Classroom</title>
+        <script src="./views/web/js/User.js" type="text/javascript"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js" type="text/javascript"></script>
+    </h:head>
+
+    <h:body>
+        <h:form method="post" class="tab">
+            <h:commandButton value="Зарегистрироваться" class="inputLogin" action="#{loginBean.toRegPage()}">
+            </h:commandButton>
+        </h:form>
+        <div id="Login" class="tabcontent" align="center" style="max-width: 20%;">
+            <h:form class="loginForm" prependId="false">
+                <p:panel header="Войти в Virtual Classroom">
+                    <div class="row">
+                        <div class="col">
+                            <p:outputLabel value="Введите ваш ник: "/>
+                            <p:inputText id="j_username" type="text" class="InputName" name="j_username"
+                                         pattern="^[0-9a-zA-Z]+$" maxlength="15" required="true">
+                            </p:inputText>
+                            <p:outputLabel value="Введите пароль: "/>
+                            <p:inputText id="j_password" type="password" class="InputName" name="j_password"
+                                         pattern="^[0-9a-zA-Z]+$" maxlength="15" required="true">
+                            </p:inputText>
+                            <h:commandButton value="Войти" class="inputLogin" action="#{loginBean.login()}">
+                            </h:commandButton>
+                        </div>
+                    </div>
+                </p:panel>
+            </h:form>
+        </div>
+        <script src="./views/web/js/Socet.js" type="text/javascript"></script>
+
+    </h:body>
+</f:view>
+
+</html>

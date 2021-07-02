@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns="http://www.springframework.org/schema/security"
+             xmlns:beans="http://www.springframework.org/schema/beans"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xmlns:security="http://www.springframework.org/schema/security"
+             xsi:schemaLocation="http://www.springframework.org/schema/beans
+	http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+	http://www.springframework.org/schema/security
+	http://www.springframework.org/schema/security/spring-security-3.2.xsd">
+
+    <global-method-security secured-annotations="enabled">
+    </global-method-security>
+
+    <security:http auto-config="true" use-expressions="true">
+        <security:intercept-url pattern="/views/secondPage.xhtml" access="isAuthenticated()"/>
+        <security:intercept-url pattern="/views/regPage.xhtml" access="permitAll()"/>
+        <security:intercept-url pattern="/index.xhtml" access="permitAll()"/>
+        <security:intercept-url pattern="/views/checkPage.xhtml" access="denyAll()"/>
+        <security:form-login login-page="/index.xhtml" login-processing-url="/j_spring_security_check"
+                             username-parameter="j_username"
+                             password-parameter="j_password" default-target-url="/views/secondPage.xhtml"
+                             always-use-default-target="true"/>
+        <security:logout logout-success-url="/index.xhtml" logout-url="/j_spring_security_logout"
+                         invalidate-session="true"/>
+    </security:http>
+
+    <beans:bean id="http403EntryPoint"
+                class="org.springframework.security.web.authentication.Http403ForbiddenEntryPoint">
+    </beans:bean>
+    <beans:bean id="loginBean" class="beans.LoginBean">
+    </beans:bean>
+    <beans:bean id="regBean" class="beans.RegBean">
+    </beans:bean>
+    <beans:bean id="usersBean" class="beans.UsersBean">
+    </beans:bean>
+    <beans:bean id="userDTO" class="entity.UserDTO">
+    </beans:bean>
+
+    <beans:bean id="authUserDetailsBean"
+                class="security.SecurityUserDetailsService">
+        <beans:property name="userDto" ref="userDTO"/>
+    </beans:bean>
+
+    <security:authentication-manager>
+        <security:authentication-provider user-service-ref="authUserDetailsBean">
+            <security:password-encoder hash="md5"/>
+        </security:authentication-provider>
+    </security:authentication-manager>
+
+</beans:beans>
