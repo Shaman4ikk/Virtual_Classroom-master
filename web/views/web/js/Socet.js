@@ -27,7 +27,6 @@ function initName(e) {
     let json = JSON.stringify({
         "action": "login"
     });
-    alert(json);
     webSocket.send(json);
     sessionStorage.setItem("name", name);
 }

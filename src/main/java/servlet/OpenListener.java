@@ -10,7 +10,8 @@ import javax.servlet.annotation.WebListener;
 public class OpenListener implements ServletContextListener {
     @Override
     public void contextInitialized(ServletContextEvent servletContextEvent) {
-        UserRepository.connect();
+//        UserRepository.connect();
+        UserRepository.start();
     }
 
     @Override

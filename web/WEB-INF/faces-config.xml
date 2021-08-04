@@ -36,5 +36,29 @@
 
     </navigation-rule>
 
+    <navigation-rule>
+        <from-view-id>*</from-view-id>
+
+        <navigation-case>
+            <from-outcome>adminPage</from-outcome>
+            <to-view-id>/views/usersPage.xhtml</to-view-id>
+            <redirect/>
+        </navigation-case>
+
+    </navigation-rule>
+
+
+    <navigation-rule>
+        <from-view-id>*</from-view-id>
+
+        <navigation-case>
+            <from-outcome>regUser</from-outcome>
+            <to-view-id>/views/addUser.xhtml</to-view-id>
+            <redirect/>
+        </navigation-case>
+
+    </navigation-rule>
+
+
 
 </faces-config>

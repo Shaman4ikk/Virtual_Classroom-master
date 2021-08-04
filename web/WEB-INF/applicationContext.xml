@@ -15,7 +15,8 @@
         <security:intercept-url pattern="/views/secondPage.xhtml" access="isAuthenticated()"/>
         <security:intercept-url pattern="/views/regPage.xhtml" access="permitAll()"/>
         <security:intercept-url pattern="/index.xhtml" access="permitAll()"/>
-        <security:intercept-url pattern="/views/checkPage.xhtml" access="denyAll()"/>
+        <security:intercept-url pattern="/views/usersPage.xhtml" access="hasRole('admin')"/>
+        <security:intercept-url pattern="/views/addUser.xhtml" access="hasRole('admin')"/>
         <security:form-login login-page="/index.xhtml" login-processing-url="/j_spring_security_check"
                              username-parameter="j_username"
                              password-parameter="j_password" default-target-url="/views/secondPage.xhtml"

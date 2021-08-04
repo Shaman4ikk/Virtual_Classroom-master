@@ -12,10 +12,10 @@ public class UserDetailsImpl implements UserDetails {
 
     private Collection<? extends GrantedAuthority> _grantedAuthority = null;
 
-    public UserDetailsImpl(String name, String password) {
+    public UserDetailsImpl(String name, String password, Collection<? extends GrantedAuthority> _grantedAuthority) {
         this.name = name;
-
         this.password = password;
+        this._grantedAuthority = _grantedAuthority;
     }
 
     @Override

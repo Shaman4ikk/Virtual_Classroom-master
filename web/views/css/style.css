@@ -28,6 +28,11 @@
     margin-left: 30% !important;
 }
 
+.regUser {
+    padding: 3%;
+    position: center;
+}
+
 /* Style the tab */
 .tab {
     overflow: hidden;

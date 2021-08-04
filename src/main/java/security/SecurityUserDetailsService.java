@@ -18,8 +18,7 @@ public class SecurityUserDetailsService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String login) throws UsernameNotFoundException {
         UserDetails userDTO = UserRepository.login(login);
-        System.out.println(userDTO.toString());
-        return userDTO;
+         return userDTO;
     }
 
     public void setUserDto(UserDTO userDto) {

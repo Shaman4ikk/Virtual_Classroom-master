@@ -1,5 +1,8 @@
 package reprository;
 
+import entity.UserAccount;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.GrantedAuthorityImpl;
 import org.springframework.security.core.userdetails.UserDetails;
 import orm.User;
 import entity.UserDTO;
@@ -13,8 +16,11 @@ import security.UserDetailsImpl;
 import util.HibernateUtil;
 
 import javax.faces.context.FacesContext;
+import java.sql.Date;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class UserRepository {
 
@@ -41,6 +47,41 @@ public class UserRepository {
         return result;
     }
 
+    public static void start(){
+        Session session = HibernateUtil.getSession().openSession();
+        try{
+            if(session.createCriteria(User.class).setMaxResults(1).list().isEmpty()){
+                session.beginTransaction();
+                User user = new User();
+                user.setName("admin");
+                user.setPassword(hashMD5("12345"));
+                user.setHandUp(false);
+                user.setAccess("admin");
+                session.save(user);
+                session.getTransaction().commit();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            session.close();
+        }
+    }
+
+    public static void saveUser(UserAccount userAccount){
+        Session session = HibernateUtil.getSession().openSession();
+        try {
+            session.beginTransaction();
+            User user = (User) session.createCriteria(User.class).add(Restrictions.eq("id", userAccount.id)).uniqueResult();
+            user.setFirstName(userAccount.firstName);
+            user.setLastName(userAccount.lastName);
+            user.setBitrhday((Date) userAccount.birthday);
+            session.update(user);
+            session.getTransaction().commit();
+        } catch (HibernateException e) {
+            logger.debug("Exeption: " + e);
+        }
+    }
+
     public static boolean login(String login, String password) {
         Session session = HibernateUtil.getSession().openSession();
         try {
@@ -62,7 +103,10 @@ public class UserRepository {
         try {
             User user = (User) session.createCriteria(User.class).add(Restrictions.eq("login", login)).uniqueResult();
             UserDTO userDTO = new UserDTO(user.login, user.handUp);
-            UserDetails userDetails = new UserDetailsImpl(user.login, user.password);
+            List<String> grantsList = new ArrayList<>();
+            grantsList.add(user.access);
+            Set<GrantedAuthority> authoritiesSet = getGrantedAuthoritiesFromList(grantsList);
+            UserDetails userDetails = new UserDetailsImpl(user.login, user.password, authoritiesSet);
             addToListUser(userDTO);
             return userDetails;
         } catch (HibernateException | NullPointerException e) {
@@ -73,18 +117,30 @@ public class UserRepository {
         return null;
     }
 
-    public static UserDTO checkUserDB(String name){
+    public static UserAccount getUser(int id){
         Session session = HibernateUtil.getSession().openSession();
         try {
-            User user = (User) session.createCriteria(User.class).add(Restrictions.eq("login", name)).uniqueResult();
-            UserDTO userDTO = new UserDTO(user.login, user.handUp);
-            return userDTO;
+            User user = (User) session.createCriteria(User.class).add(Restrictions.eq("id", id)).uniqueResult();
+            return new UserAccount(user.id, user.login, user.firstName, user.lastName, user.bitrhday, user.password);
         } catch (HibernateException | NullPointerException e) {
             logger.debug("Exeption: " + e);
         } finally {
             session.close();
         }
         return null;
+    }
+
+    public static List<UserAccount> getUsersFromDB(){
+        Session session = HibernateUtil.getSession().openSession();
+        List<User> users =  session.createCriteria(User.class).add(Restrictions.eq("access", "user")).list();
+        List<UserAccount> userDTOS1 = new ArrayList<>();
+        if(users != null){
+            for(User u: users){
+                UserAccount userDTO = new UserAccount(u.id, u.login, u.firstName, u.lastName, u.bitrhday);
+                userDTOS1.add(userDTO);
+            }
+        }
+        return userDTOS1;
     }
 
     public static boolean register(String login, String password) {
@@ -96,11 +152,10 @@ public class UserRepository {
             user.setName(login);
             user.setPassword(password);
             user.setHandUp(false);
+            user.setAccess("user");
             session.save(user);
             session.getTransaction().commit();
             if (user.getName() != null && user.getPassword() != null) {
-                UserDTO userDTO = new UserDTO(user.login, user.handUp);
-                addToListUser(userDTO);
                 return true;
             }
         } catch (HibernateException | NullPointerException e) {
@@ -109,6 +164,30 @@ public class UserRepository {
             session.close();
         }
         return false;
+    }
+
+    public static void addNewUser(UserAccount userAccount){
+        Session session = HibernateUtil.getSession().openSession();
+        try {
+            session.beginTransaction();
+            User user = new User();
+            user.setName(userAccount.login);
+            user.setPassword(hashMD5(userAccount.password));
+            user.setFirstName(userAccount.firstName);
+            user.setLastName(userAccount.lastName);
+            if(userAccount.birthday != null){
+                user.setBitrhday(userAccount.birthday);
+            }
+            user.setHandUp(false);
+            user.setAccess("user");
+            session.save(user);
+            session.getTransaction().commit();
+        } catch (HibernateException | NullPointerException e) {
+            logger.debug("Exeption: " + e);
+        } finally {
+            session.close();
+        }
+
     }
 
     //Добавление пользователей в список
@@ -152,6 +231,7 @@ public class UserRepository {
         Session session = HibernateUtil.getSession().openSession();
         session.beginTransaction();
         session.getTransaction().commit();
+        session.close();
     }
 
     //Поднятие и опускание руки
@@ -172,4 +252,30 @@ public class UserRepository {
             logger.debug("Failed handUp/handDown: " + e);
         }
     }
+
+    public static void removeUserFromDB(int id){
+        System.out.println(id);
+        Session session = HibernateUtil.getSession().openSession();
+        try {
+            session.beginTransaction();
+            session.delete(session.createCriteria(User.class).add(Restrictions.eq("id", id)).uniqueResult());
+            session.getTransaction().commit();
+        } catch (HibernateException | NullPointerException e) {
+            logger.debug("Exeption: " + e);
+        } finally {
+            session.close();
+        }
+    }
+
+    static Set<GrantedAuthority> getGrantedAuthoritiesFromList(List<String> grantsList) {
+        Set<GrantedAuthority> authoritiesSet = new HashSet<>();
+
+        GrantedAuthority grAuth;
+        for (String grant : grantsList) {
+            grAuth = new GrantedAuthorityImpl(grant);
+            authoritiesSet.add(grAuth);
+        }
+        return authoritiesSet;
+    }
+
 }
